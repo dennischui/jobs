@@ -5,13 +5,14 @@ import threading
 import time
 
 from config import DB_NAME, SCRAPE_INTERVAL_SECONDS
-from scraper_runner import run_scraper
+from scrapers.scraper_runner import run_scraper
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     with sqlite3.connect(DB_NAME) as conn:
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
         c.execute('SELECT company, title, link, posted_at, scraped_at FROM jobs ORDER BY scraped_at DESC')
         jobs = c.fetchall()

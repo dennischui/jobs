@@ -1,0 +1,6 @@
+check all links in companies JSON file. 
+- make sure it returns 200, maybe have a green checkbox in the frontend dashboard
+- for those that dont work (403 - forbidden), maybe load those webpages up?? handle this somehow
+- fetch/retrieve all pages
+- process them
+- put them into the database. 
