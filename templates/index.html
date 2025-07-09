@@ -1,0 +1,7 @@
+<html><head><title>Job Listings</title></head><body>
+<h1>Scraped Job Listings</h1><ul>
+{% for company, title, link, posted_at, scraped_at in jobs %}
+    <li><strong>{{ company }}</strong>: <a href="{{ link }}" target="_blank">{{ title }}</a><br>
+    Posted: {{ posted_at }} | Scraped: {{ scraped_at }}</li>
+{% endfor %}
+</ul></body></html>
