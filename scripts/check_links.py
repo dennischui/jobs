@@ -30,7 +30,7 @@ def check_link(company: Dict) -> Dict:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
         }
-        response = requests.get(company['link'], headers=headers, timeout=10)
+        # response = requests.get(company['link'], headers=headers, timeout=10)
         result['status'] = response.status_code
         
     except requests.exceptions.RequestException as e:

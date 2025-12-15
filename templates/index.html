@@ -1,7 +1,110 @@
-<html><head><title>Job Listings</title></head><body>
-<h1>Scraped Job Listings</h1><ul>
-{% for company, title, link, posted_at, scraped_at in jobs %}
-    <li><strong>{{ company }}</strong>: <a href="{{ link }}" target="_blank">{{ title }}</a><br>
-    Posted: {{ posted_at }} | Scraped: {{ scraped_at }}</li>
-{% endfor %}
-</ul></body></html>
+<html>
+<head>
+    <title>Job Listings</title>
+    <style>
+        body { display: flex; gap: 20px; padding: 20px; }
+        .main { flex: 1; }
+        .sidebar { width: 250px; }
+        .sidebar h2 { font-size: 1.1em; margin-top: 0; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar li { padding: 5px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background-color: #f2f2f2; cursor: pointer; }
+        th:hover { background-color: #ddd; }
+        #filter { margin-bottom: 10px; padding: 5px; width: 200px; }
+        #locationFilter { margin-bottom: 10px; padding: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+<div class="main">
+    <h1>Scraped Job Listings</h1>
+    <input type="text" id="filter" placeholder="Filter by company or title...">
+    <input type="text" id="locationFilter" placeholder="Filter by location...">
+    <table id="jobsTable">
+        <thead>
+            <tr>
+                <th data-column="company">Company</th>
+                <th data-column="title">Title</th>
+                <th data-column="location">Location</th>
+                <th data-column="scraped_at">Scraped At</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for job in jobs %}
+            <tr>
+                <td><strong>{{ job['company'] }}</strong></td>
+                <td><a href="{{ job['link'] }}" target="_blank">{{ job['title'] }}</a></td>
+                <td>{{ job['location'] }}</td>
+                <td>{{ job['scraped_at'] }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="sidebar">
+    <h2>Companies</h2>
+    <ul>
+    {% for company in companies %}
+        <li>
+            <strong>{{ company['name'] }}</strong><br>
+            <a href="{{ company['link'] }}" target="_blank">Visit</a><br>
+            <small>Last accessed: {{ company['last_accessed'] }}</small>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+<script>
+    const table = document.getElementById('jobsTable');
+    const tbody = table.querySelector('tbody');
+    const filterInput = document.getElementById('filter');
+    const locationFilterInput = document.getElementById('locationFilter');
+    let sortDirection = {};
+
+    // Sorting function
+    table.querySelectorAll('th').forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.dataset.column;
+            sortDirection[column] = !sortDirection[column];
+            sortTable(column, sortDirection[column]);
+        });
+    });
+
+    function sortTable(column, asc) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            const aVal = a.cells[getColumnIndex(column)].textContent.trim();
+            const bVal = b.cells[getColumnIndex(column)].textContent.trim();
+            return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    function getColumnIndex(column) {
+        const headers = table.querySelectorAll('th');
+        for (let i = 0; i < headers.length; i++) {
+            if (headers[i].dataset.column === column) return i;
+        }
+        return 0;
+    }
+
+    // Filtering function
+    function applyFilters() {
+        const filter = filterInput.value.toLowerCase();
+        const locationFilter = locationFilterInput.value.toLowerCase();
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(row => {
+            const company = row.cells[0].textContent.toLowerCase();
+            const title = row.cells[1].textContent.toLowerCase();
+            const location = row.cells[2].textContent.toLowerCase();
+            const matchesCompanyTitle = company.includes(filter) || title.includes(filter);
+            const matchesLocation = location.includes(locationFilter);
+            row.style.display = (matchesCompanyTitle && matchesLocation) ? '' : 'none';
+        });
+    }
+
+    filterInput.addEventListener('input', applyFilters);
+    locationFilterInput.addEventListener('input', applyFilters);
+</script>
+</body>
+</html>

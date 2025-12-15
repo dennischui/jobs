@@ -2,7 +2,6 @@ import json
 import time
 import logging
 from scrapers.scraper_loader import load_scraper_class
-from scrapers.db import save_jobs
 from typing import List, Dict
 from scrapers.culture_amp_scraper import CultureAmpScraper
 
@@ -14,7 +13,7 @@ logging.basicConfig(
 
 # Rate limiting configuration
 RATE_LIMIT_DELAY = 5  # seconds between requests
-MAX_RETRIES = 3
+MAX_RETRIES = 2
 RETRY_DELAY = 30  # seconds between retries
 
 def load_companies(filename: str) -> List[Dict]:
@@ -38,11 +37,10 @@ def run_scraper() -> List:
                 # Add rate limiting delay before making request
                 time.sleep(RATE_LIMIT_DELAY)
                 
-                jobs = scraper.fetch_jobs()
-                new_jobs = save_jobs(jobs)
-                all_new_jobs.extend(new_jobs)
+                jobs_df = scraper.fetch_jobs()
+                add_jobs = scraper.save_jobs(jobs_df, 'jobs.db')
                 
-                logging.info(f"Successfully scraped {len(new_jobs)} jobs from {company}")
+                logging.info(f"Successfully scraped {len(add_jobs)} jobs from {company}")
                 break  # Success - exit retry loop
                 
             except NotImplementedError as e:

@@ -6,7 +6,8 @@ import time
 
 from config import DB_NAME, SCRAPE_INTERVAL_SECONDS
 from scrapers.scraper_runner import run_scraper
-
+from scrapers.db import initialise_db
+import os
 app = Flask(__name__)
 
 @app.route('/')
@@ -14,11 +15,21 @@ def index():
     with sqlite3.connect(DB_NAME) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        c.execute('SELECT company_id, title, location, link, created_at FROM job ORDER BY created_at DESC')
+        
+        # Fetch jobs
+        c.execute('SELECT company, title, location, link, scraped_at FROM job ORDER BY scraped_at DESC')
         jobs = c.fetchall()
-    return render_template('index.html', jobs=jobs)
+        
+        # Fetch companies
+        c.execute('SELECT DISTINCT * FROM company ORDER BY name')
+        companies = c.fetchall()
+        
+    return render_template('index.html', jobs=jobs, companies=companies)
 
 def periodic_scraper():
+    if not os.path.exists(DB_NAME):
+        initialise_db(DB_NAME) 
+
     while True:
         print(f"Running scraper at {datetime.now().isoformat()}")
         run_scraper()
