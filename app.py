@@ -14,7 +14,7 @@ def index():
     with sqlite3.connect(DB_NAME) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        c.execute('SELECT company, title, link, posted_at, scraped_at FROM jobs ORDER BY scraped_at DESC')
+        c.execute('SELECT company_id, title, location, link, created_at FROM job ORDER BY created_at DESC')
         jobs = c.fetchall()
     return render_template('index.html', jobs=jobs)
 

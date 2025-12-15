@@ -4,7 +4,6 @@ import logging
 from scrapers.scraper_loader import load_scraper_class
 from scrapers.db import save_jobs
 from typing import List, Dict
-from scrapers.canva_scraper import CanvaScraper
 from scrapers.culture_amp_scraper import CultureAmpScraper
 
 # Configure logging
