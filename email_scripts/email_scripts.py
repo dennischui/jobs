@@ -2,17 +2,18 @@
 import smtplib
 import ssl
 from email.message import EmailMessage
-
+import os
+from dotenv import load_dotenv
 def main():
 
+    load_dotenv()  # Load environment variables from .env file if using python-dotenv
     # --- Configuration ---
     # Your email and the generated App Password (for Gmail)
     # It is recommended to store these in environment variables for security
-    sender_email = "nahyeyenah@gmail.com"
-    app_password = "your_app_password" # Use the generated App Password here
-
+    sender_email = os.getenv("SENDER_EMAIL")  # Your email address
+    app_password = os.getenv("EMAIL_PASSWORD")  # Your app password
     # Recipient email address
-    receiver_email = "recipient_email@example.com"
+    receiver_email = os.getenv("RECEIVER_EMAIL")  # Recipient email address
 
     # Email content
     subject = "Python Notification"
@@ -40,5 +41,4 @@ def main():
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    try:
-        main()
+    main()
