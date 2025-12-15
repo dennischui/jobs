@@ -42,18 +42,8 @@
         </tbody>
     </table>
 </div>
-<div class="sidebar">
-    <h2>Companies</h2>
-    <ul>
-    {% for company in companies %}
-        <li>
-            <strong>{{ company['name'] }}</strong><br>
-            <a href="{{ company['link'] }}" target="_blank">Visit</a><br>
-            <small>Last accessed: {{ company['last_accessed'] }}</small>
-        </li>
-    {% endfor %}
-    </ul>
-</div>
+
+<a href = "/companies">GO TO LIST OF COMPANIES</a>
 <script>
     const table = document.getElementById('jobsTable');
     const tbody = table.querySelector('tbody');

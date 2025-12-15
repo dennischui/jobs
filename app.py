@@ -20,11 +20,20 @@ def index():
         c.execute('SELECT company, title, location, link, scraped_at FROM job ORDER BY scraped_at DESC')
         jobs = c.fetchall()
         
+    return render_template('index.html', jobs=jobs)
+
+
+@app.route('/companies')
+def companies():
+    with sqlite3.connect(DB_NAME) as conn:
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
         # Fetch companies
         c.execute('SELECT DISTINCT * FROM company ORDER BY name')
         companies = c.fetchall()
-        
-    return render_template('index.html', jobs=jobs, companies=companies)
+    print(companies)
+    return render_template('companies.html', companies=companies)
+
 
 def periodic_scraper():
     if not os.path.exists(DB_NAME):
