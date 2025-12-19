@@ -3,8 +3,7 @@ import time
 import logging
 from scrapers.scraper_loader import load_scraper_class
 from typing import List, Dict
-from scrapers.culture_amp_scraper import CultureAmpScraper
-from scrapers.company_scrapers import ReaGroupScraper
+from scrapers.company_scrapers import *
 
 # Configure logging
 logging.basicConfig(

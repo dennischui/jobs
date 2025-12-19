@@ -1,7 +1,7 @@
 import importlib
 from scrapers.base_scraper import BaseScraper
 def load_scraper_class(company_name) -> BaseScraper:
-    module_name = f"scrapers.{company_name.lower()}_scraper"
+    module_name = f"scrapers.company_scrapers"
     class_name = f"{''.join([i[0].upper()+i[1:] for i in company_name.split('_')])}Scraper"
     print(f"{class_name=}")
     try:

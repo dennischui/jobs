@@ -7,7 +7,7 @@ import requests
 
 from config import DB_NAME, SCRAPE_INTERVAL_SECONDS
 from scrapers.scraper_runner import run_scraper
-from scrapers.db import initialise_db
+from db import initialise_db
 import os
 app = Flask(__name__)
 
@@ -18,10 +18,11 @@ def index():
         c = conn.cursor()
         
         # Fetch jobs
-        c.execute('''SELECT company.name as company_name, title, location, job.link, scraped_at 
-                  FROM job 
-                  LEFT JOIN company ON job.company = company.id
-                  ORDER BY scraped_at DESC''')
+        c.execute('''SELECT company.name as company_name, title, location, job.link, (posted_at - datetime('now')) as current_date
+              FROM job 
+              LEFT JOIN company ON job.company = company.id
+              WHERE expired_at IS NULL
+              ORDER BY current_date ASC''')
         jobs = c.fetchall()
         
     return render_template('index.html', jobs=jobs)
@@ -35,7 +36,6 @@ def companies():
         # Fetch companies
         c.execute('SELECT DISTINCT * FROM company ORDER BY name')
         companies = c.fetchall()
-    print(companies)
     return render_template('companies.html', companies=companies)
 
 

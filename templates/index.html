@@ -14,6 +14,8 @@
         th:hover { background-color: #ddd; }
         #filter { margin-bottom: 10px; padding: 5px; width: 200px; }
         #locationFilter { margin-bottom: 10px; padding: 5px; width: 200px; }
+        .highlight-green { background-color: lightgreen; }
+        .highlight-yellow { background-color: lightyellow; }
     </style>
 </head>
 <body>
@@ -27,16 +29,16 @@
                 <th data-column="company_name">Company</th>
                 <th data-column="title">Title</th>
                 <th data-column="location">Location</th>
-                <th data-column="scraped_at">Scraped At</th>
+                <th data-column="posted_at">Posted At</th>
             </tr>
         </thead>
         <tbody>
         {% for job in jobs %}
-            <tr>
+            <tr {% if job['current_date'] <=7 %}class="highlight-green"{% elif job['current_date'] > 7 %}class="highlight-yellow"{% endif %}>
                 <td><strong>{{ job['company_name'] }}</strong></td>
                 <td><a href="{{ job['link'] }}" target="_blank">{{ job['title'] }}</a></td>
                 <td>{{ job['location'] }}</td>
-                <td>{{ job['scraped_at'] }}</td>
+                <td>{{ job['current_date'] }} days ago</td>
             </tr>
         {% endfor %}
         </tbody>

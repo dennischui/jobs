@@ -5,6 +5,7 @@ from typing import List, Dict
 import pandas as pd
 import sqlite3
 from datetime import datetime
+import numpy as np
 
 class BaseScraper(ABC):
     """Base class for job scrapers"""
@@ -80,8 +81,8 @@ class BaseScraper(ABC):
             for idx,job in jobs_df.iterrows():
                 time_now = datetime.now().isoformat()
                 date_now = time_now.split("T")[0]
-                c.execute('INSERT INTO job (company, location, title, link, posted_at, scraped_at, expired_at) VALUES (?,?, ?, ?, ?, ?, ?)',
-                        (self.id, job.Location,job.Title, job.Link, date_now, time_now, "NULL"))
+                c.execute('INSERT INTO job (company, location, title, link, posted_at, expired_at) VALUES (?,?, ?, ?, ?, ?)',
+                        (self.id, job.Location,job.Title, job.Link, date_now, np.nan))
             conn.commit()
         return jobs_df
     
