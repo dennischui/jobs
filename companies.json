@@ -1,5 +1,17 @@
 [
   {
+    "name": "culture_amp",
+    "link": "https://www.cultureamp.com/company/careers#open-roles",
+    "tier": "Tier 2",
+    "industry": "Technology / Software"
+  },
+  {
+    "name": "Canva",
+    "link": "https://www.lifeatcanva.com/en/jobs/?search=&team=Engineering&specialty=Analytics+Engineer&specialty=Applied+Science&specialty=Data+Science&specialty=Machine+Learning+Engineer&country=Australia&pagesize=20#results",
+    "status": 403,
+    "error": null
+  },
+  {
     "name": "rea_group",
     "link": "https://www.rea-group.com/careers/jobs",
     "tier": "Tier 2",

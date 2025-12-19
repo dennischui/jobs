@@ -3,6 +3,88 @@ import requests
 from bs4 import BeautifulSoup
 from .base_scraper import BaseScraper
 import pandas as pd
+
+class ReaGroupScraper(BaseScraper):
+    """Scraper for REA Group careers page"""
+
+    def __init__(self, company: str, url: str):
+        super().__init__(company, url)
+        self.base_url = "https://www.rea-group.com"
+        self.headers.update({
+            'Accept': 'application/json',
+            'Referer': 'https://www.rea-group.com/careers/jobs'
+        })
+        # add to company table in db
+        self.add_company_to_db()
+
+    def fetch_jobs(self) -> pd.DataFrame:
+        """Fetch jobs from Culture Amp careers page"""
+        try:
+            # ----- UNCOMMENT FOR REAL REQUEST -----
+            # # First get the careers page
+            # # response = requests.get(self.url, headers=self.headers)
+            # # self.response=response
+            # # response.raise_for_status()
+            
+            # soup = BeautifulSoup(response.text, 'html.parser')
+            # return soup
+            # ----- UNCOMMENT FOR REAL REQUEST -----
+            with open(r"./sample_pages/REA Group response text new.htm", "r", encoding="utf-8") as f:
+                html_content = f.read()
+            soup = BeautifulSoup(html_content, 'html.parser')
+            self.soup = soup
+            jobs = []
+            
+            # Find all job listings
+            job_listings = soup.select('.l-job-listing__item')
+            for listing in job_listings:
+                
+                # filter out non job listings that got caught by the selector
+                # job listings have the anchor tag inside the div
+                if not listing.select('a'):
+                    print("Skipping non-job listing")
+                    continue
+                job = self._parse_job_listing(listing)
+                if job:
+                    jobs.append(job)
+            
+
+            jobs_df = pd.DataFrame(columns=["Title", "Location", "Link"])
+            for job in jobs:
+                jobs_df = pd.concat([jobs_df, pd.DataFrame({
+                    "Title": [job['title']], 
+                    "Location": [job['location']], 
+                    "Link": [job['link']]
+                    }
+                    )], ignore_index=True)
+
+            return jobs_df
+            
+        except Exception as e:
+            self.logger.error(f"Error fetching jobs from {self.company}: {str(e)}")
+            return []
+
+
+
+
+    def _parse_job_listing(self, listing: BeautifulSoup) -> Dict:
+        """Parse individual job listing"""
+        try:
+            title = listing.find('div', class_='c-job__title').text.strip()
+            location = ''.join([i.strip() for i in listing.select('.c-job__col')[1].children if isinstance(i,str) ])
+            link = listing.find('a').get('href')
+            return {
+                'title': title,
+                'company': self.company,
+                'location': location,
+                'link': link,
+                'source': 'REA Group Careers'
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error parsing job listing: {str(e)}")
+            return None
+
 class CultureAmpScraper(BaseScraper):
     """Scraper for Culture Amp careers page"""
     

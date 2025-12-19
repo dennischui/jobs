@@ -4,7 +4,7 @@ import logging
 from scrapers.scraper_loader import load_scraper_class
 from typing import List, Dict
 from scrapers.culture_amp_scraper import CultureAmpScraper
-from scrapers.rea_group_scraper import ReaGroupScraper
+from scrapers.company_scrapers import ReaGroupScraper
 
 # Configure logging
 logging.basicConfig(

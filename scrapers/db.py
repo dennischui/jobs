@@ -10,9 +10,11 @@ def initialise_db(db_name):
         c.execute('''
         CREATE TABLE IF NOT EXISTS company (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE,
-            link TEXT,
-            last_accessed TIMESTAMP
+            name TEXT NOT NULL UNIQUE,
+            link TEXT NOT NULL,
+            last_accessed TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            healthy INTEGER DEFAULT NULL
         );
         ''')
         

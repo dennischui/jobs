@@ -10,6 +10,7 @@
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1 class="h3 mb-0">Companies</h1>
+            <a href="/check_health" class="btn btn-primary">Check Health</a>
         </div>
 
         {% if companies %}
@@ -20,6 +21,7 @@
                             <th>Name</th>
                             <th>Link</th>
                             <th>Last Accessed</th>
+                            <th>Health</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -32,6 +34,7 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ company.last_accessed }}</td>
+                                <td>{% if company.healthy == 1 %}✅{% endif %}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
