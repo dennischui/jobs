@@ -24,7 +24,6 @@ def setup_database():
         title TEXT NOT NULL,
         location TEXT,
         link TEXT NOT NULL,
-        user_removed BOOLEAN DEFAULT 0,
         last_retrieved TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (company_id) REFERENCES company (id)

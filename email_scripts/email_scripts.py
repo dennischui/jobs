@@ -4,7 +4,7 @@ import ssl
 from email.message import EmailMessage
 import os
 from dotenv import load_dotenv
-def main():
+def send_email():
 
     load_dotenv()  # Load environment variables from .env file if using python-dotenv
     # --- Configuration ---
@@ -16,7 +16,7 @@ def main():
     receiver_email = os.getenv("RECEIVER_EMAIL")  # Recipient email address
 
     # Email content
-    subject = "Python Notification"
+    subject = "Python Job Notification"
     body = "This is an automated email notification sent from a Python script."
 
     # --- Create the email message ---
@@ -41,4 +41,4 @@ def main():
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    main()
+    send_email()

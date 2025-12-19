@@ -38,7 +38,34 @@ class BaseScraper(ABC):
         """Fetch all jobs from the career page"""
         pass
 
+    def get_new_jobs(self, jobs_df: pd.DataFrame, db_name: str) -> List[Dict]:
+        """
+        Docstring for get_new_jobs
+        this allows duplicates. (company, title, location) to be unique
         
+        :param self: Description
+        :param jobs_df: Description
+        :type jobs_df: pd.DataFrame
+        :param db_name: Description
+        :type db_name: str
+        :return: Description
+        :rtype: List[Dict]
+        """
+        new_jobs = []
+        with sqlite3.connect('jobs.db') as conn:
+            c = conn.cursor()
+            c.execute("SELECT title, location, link, posted_at, scraped_at FROM job where company = ?", (self.id,))
+            result = c.fetchall() #list of tuples
+        
+        for _, job in jobs_df.iterrows():
+            if (job.Title, job.Location, job.Link, "NULL") in result:
+                result.pop(result.index((job.Title, job.Location, job.Link, "NULL")))
+            else:
+                new_jobs.append(job)
+            # everything in new jobs is new, everything existing in result is gone (can be archived)
+        return new_jobs
+
+
     def save_jobs(self, jobs_df:pd.DataFrame, DB_NAME:str):
         """Save jobs from DataFrame to database"""
         with sqlite3.connect(DB_NAME) as conn:

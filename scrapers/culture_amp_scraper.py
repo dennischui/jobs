@@ -66,6 +66,9 @@ class CultureAmpScraper(BaseScraper):
             self.logger.error(f"Error fetching jobs from {self.company}: {str(e)}")
             return []
 
+
+
+
     def _parse_job_listing(self, listing: BeautifulSoup) -> Dict:
         """Parse individual job listing"""
         try:

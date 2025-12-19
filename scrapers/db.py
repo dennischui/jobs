@@ -26,7 +26,6 @@ def initialise_db(db_name):
             link TEXT,
             posted_at TIMESTAMP,
             scraped_at TIMESTAMP,
-            user_removed BOOLEAN DEFAULT 0
         );
         ''')
         
