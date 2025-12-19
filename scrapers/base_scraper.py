@@ -51,19 +51,19 @@ class BaseScraper(ABC):
         :return: Description
         :rtype: List[Dict]
         """
-        new_jobs = []
-        with sqlite3.connect('jobs.db') as conn:
-            c = conn.cursor()
-            c.execute("SELECT title, location, link, posted_at, scraped_at FROM job where company = ?", (self.id,))
-            result = c.fetchall() #list of tuples
-        
-        for _, job in jobs_df.iterrows():
-            if (job.Title, job.Location, job.Link, "NULL") in result:
-                result.pop(result.index((job.Title, job.Location, job.Link, "NULL")))
+        new_jobs = pd.DataFrame(columns=["Title", "Location", "Link"])
+        database_jobs = pd.read_sql_query("SELECT title, location, link FROM job WHERE company = ?",
+                                         sqlite3.connect(db_name), params=(self.id,))
+        indexes_to_remove = []
+        for idx, job in jobs_df.iterrows():
+            if (job.Title, job.Location, job.Link) in database_jobs:
+                # store the index for popping later
+                indexes_to_remove.append(idx)
             else:
-                new_jobs.append(job)
+                new_jobs = pd.concat([new_jobs, job.to_frame().T], ignore_index=True)
             # everything in new jobs is new, everything existing in result is gone (can be archived)
-        return new_jobs
+        expired_jobs = database_jobs[~database_jobs.index.isin(indexes_to_remove)]
+        return new_jobs, expired_jobs
 
 
     def save_jobs(self, jobs_df:pd.DataFrame, DB_NAME:str):

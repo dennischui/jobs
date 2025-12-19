@@ -25,9 +25,10 @@ def initialise_db(db_name):
             location TEXT,
             link TEXT,
             posted_at TIMESTAMP,
-            scraped_at TIMESTAMP,
+            scraped_at TIMESTAMP
         );
         ''')
         
         conn.commit()
-        return
+    conn.close()
+    return

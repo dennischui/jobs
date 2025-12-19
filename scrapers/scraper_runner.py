@@ -38,8 +38,8 @@ def run_scraper() -> List:
                 time.sleep(RATE_LIMIT_DELAY)
                 
                 jobs_df = scraper.fetch_jobs()
-                new_jobs = scraper.get_new_jobs(jobs_df, 'jobs.db')
-                add_jobs = scraper.save_jobs(add_jobs, 'jobs.db')
+                new_jobs, expired_jobs = scraper.get_new_jobs(jobs_df, 'jobs.db')
+                add_jobs = scraper.save_jobs(new_jobs, 'jobs.db')
                 
                 logging.info(f"Successfully scraped {len(add_jobs)} jobs from {company}")
                 break  # Success - exit retry loop
