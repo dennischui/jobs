@@ -3,15 +3,15 @@ import requests
 from bs4 import BeautifulSoup
 from .base_scraper import BaseScraper
 import pandas as pd
-class CultureAmpScraper(BaseScraper):
-    """Scraper for Culture Amp careers page"""
-    
+class ReaGroupScraper(BaseScraper):
+    """Scraper for REA Group careers page"""
+
     def __init__(self, company: str, url: str):
         super().__init__(company, url)
-        self.base_url = "https://www.cultureamp.com"
+        self.base_url = "https://www.rea-group.com"
         self.headers.update({
             'Accept': 'application/json',
-            'Referer': 'https://www.cultureamp.com/company/careers'
+            'Referer': 'https://www.rea-group.com/careers/jobs'
         })
         # add to company table in db
         self.add_company_to_db()
@@ -25,25 +25,22 @@ class CultureAmpScraper(BaseScraper):
             # # self.response=response
             # # response.raise_for_status()
             
-            # # The actual jobs are loaded via Greenhouse API
-            # greenhouse_url = "https://boards.greenhouse.io/cultureamp"
-            # response = requests.get(greenhouse_url, headers=self.headers) #uncomment for real request
-            # response.raise_for_status() #uncomment for real request
-            
             # soup = BeautifulSoup(response.text, 'html.parser')
             # return soup
             # ----- UNCOMMENT FOR REAL REQUEST -----
-            with open(r"./sample_pages/Culture Amp response text copy.htm", "r", encoding="utf-8") as f:
+            with open(r"./sample_pages/REA Group response text new.htm", "r", encoding="utf-8") as f:
                 html_content = f.read()
             soup = BeautifulSoup(html_content, 'html.parser')
             self.soup = soup
             jobs = []
             
             # Find all job listings
-            job_listings = soup.select('a')
+            job_listings = soup.select('.l-job-listing__item')
             for listing in job_listings:
-                #check that the listing is a job listing by checking href
-                if "https://job-boards.greenhouse.io/cultureamp/jobs/" not in listing.get('href', ''):
+                
+                # filter out non job listings that got caught by the selector
+                # job listings have the anchor tag inside the div
+                if not listing.select('a'):
                     print("Skipping non-job listing")
                     continue
                 job = self._parse_job_listing(listing)
@@ -72,14 +69,15 @@ class CultureAmpScraper(BaseScraper):
     def _parse_job_listing(self, listing: BeautifulSoup) -> Dict:
         """Parse individual job listing"""
         try:
-            title, location = listing.select('p')
-            link = listing.get('href')
+            title = listing.find('div', class_='c-job__title').text.strip()
+            location = ''.join([i.strip() for i in listing.select('.c-job__col')[1].children if isinstance(i,str) ])
+            link = listing.find('a').get('href')
             return {
-                'title': title.text.strip(),
+                'title': title,
                 'company': self.company,
-                'location': location.text.strip(),
+                'location': location,
                 'link': link,
-                'source': 'Culture Amp Careers'
+                'source': 'REA Group Careers'
             }
             
         except Exception as e:

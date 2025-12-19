@@ -55,14 +55,20 @@ class BaseScraper(ABC):
         database_jobs = pd.read_sql_query("SELECT title, location, link FROM job WHERE company = ?",
                                          sqlite3.connect(db_name), params=(self.id,))
         indexes_to_remove = []
+        
         for idx, job in jobs_df.iterrows():
-            if (job.Title, job.Location, job.Link) in database_jobs:
-                # store the index for popping later
-                indexes_to_remove.append(idx)
-            else:
+            if database_jobs.loc[(database_jobs['title'] == job.Title) & (database_jobs['location'] == job.Location) & (database_jobs['link'] == job.Link)].empty:
+                #it's a new job
                 new_jobs = pd.concat([new_jobs, job.to_frame().T], ignore_index=True)
+            else:
+                # store the index for popping later
+                #get index of the job in database_jobs
+                db_index = database_jobs.index[(database_jobs['title'] == job.Title) & (database_jobs['location'] == job.Location) & (database_jobs['link'] == job.Link)].tolist()
+                assert len(db_index) == 1
+                indexes_to_remove.append(int(db_index[0])) 
             # everything in new jobs is new, everything existing in result is gone (can be archived)
-        expired_jobs = database_jobs[~database_jobs.index.isin(indexes_to_remove)]
+        expired_jobs = database_jobs.loc[list(set(database_jobs.index.tolist()).difference(indexes_to_remove))]
+        print(f"New Jobs: {new_jobs}, Expired Jobs: {expired_jobs}")
         return new_jobs, expired_jobs
 
 
@@ -73,10 +79,22 @@ class BaseScraper(ABC):
             #insert all jobs
             for idx,job in jobs_df.iterrows():
                 time_now = datetime.now().isoformat()
-                c.execute('INSERT INTO job (company, location, title, link, posted_at, scraped_at) VALUES (?,?, ?, ?, ?, ?)',
-                        (1, job.Location,job.Title, job.Link, "NULL", time_now))
+                date_now = time_now.split("T")[0]
+                c.execute('INSERT INTO job (company, location, title, link, posted_at, scraped_at, expired_at) VALUES (?,?, ?, ?, ?, ?, ?)',
+                        (self.id, job.Location,job.Title, job.Link, date_now, time_now, "NULL"))
             conn.commit()
         return jobs_df
+    
+    def remove_expired_jobs(self, expired_jobs: pd.DataFrame, DB_NAME: str):
+        """Remove expired jobs from database"""
+        with sqlite3.connect(DB_NAME) as conn:
+            c = conn.cursor()
+            for idx, job in expired_jobs.iterrows():
+                print("removing expired jobs:", job.title)
+                c.execute('UPDATE job SET expired_at = ? WHERE company = ? AND title = ? AND location = ? AND link = ?',
+                          (datetime.now().isoformat(), self.id, job.title, job.location, job.link))
+            conn.commit()
+        return expired_jobs
     
     def add_company_to_db(self)-> int:
         """Add or update company info in the database"""

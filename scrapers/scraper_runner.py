@@ -4,6 +4,7 @@ import logging
 from scrapers.scraper_loader import load_scraper_class
 from typing import List, Dict
 from scrapers.culture_amp_scraper import CultureAmpScraper
+from scrapers.rea_group_scraper import ReaGroupScraper
 
 # Configure logging
 logging.basicConfig(
@@ -40,6 +41,7 @@ def run_scraper() -> List:
                 jobs_df = scraper.fetch_jobs()
                 new_jobs, expired_jobs = scraper.get_new_jobs(jobs_df, 'jobs.db')
                 add_jobs = scraper.save_jobs(new_jobs, 'jobs.db')
+                remove_jobs = scraper.remove_expired_jobs(expired_jobs, 'jobs.db')
                 
                 logging.info(f"Successfully scraped {len(add_jobs)} jobs from {company}")
                 break  # Success - exit retry loop

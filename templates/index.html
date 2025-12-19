@@ -24,7 +24,7 @@
     <table id="jobsTable">
         <thead>
             <tr>
-                <th data-column="company">Company</th>
+                <th data-column="company_name">Company</th>
                 <th data-column="title">Title</th>
                 <th data-column="location">Location</th>
                 <th data-column="scraped_at">Scraped At</th>
@@ -33,7 +33,7 @@
         <tbody>
         {% for job in jobs %}
             <tr>
-                <td><strong>{{ job['company'] }}</strong></td>
+                <td><strong>{{ job['company_name'] }}</strong></td>
                 <td><a href="{{ job['link'] }}" target="_blank">{{ job['title'] }}</a></td>
                 <td>{{ job['location'] }}</td>
                 <td>{{ job['scraped_at'] }}</td>

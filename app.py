@@ -17,7 +17,10 @@ def index():
         c = conn.cursor()
         
         # Fetch jobs
-        c.execute('SELECT company, title, location, link, scraped_at FROM job ORDER BY scraped_at DESC')
+        c.execute('''SELECT company.name as company_name, title, location, job.link, scraped_at 
+                  FROM job 
+                  LEFT JOIN company ON job.company = company.id
+                  ORDER BY scraped_at DESC''')
         jobs = c.fetchall()
         
     return render_template('index.html', jobs=jobs)
