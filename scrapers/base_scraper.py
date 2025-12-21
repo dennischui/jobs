@@ -6,7 +6,9 @@ import pandas as pd
 import sqlite3
 from datetime import datetime
 import numpy as np
-
+from bs4 import BeautifulSoup, element
+import requests
+from pathlib import Path
 class BaseScraper(ABC):
     """Base class for job scrapers"""
     
@@ -19,6 +21,9 @@ class BaseScraper(ABC):
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
         }
+        self.cached_page:Path = None
+        self.gen_filter_criteria = None
+        self.spec_filter_criteria = None
         self.id = self.add_company_to_db()
 
     def _load_config(self) -> Dict:
@@ -34,11 +39,81 @@ class BaseScraper(ABC):
             self.logger.error(f"Error loading config: {str(e)}")
             return {}
 
-    @abstractmethod
-    def fetch_jobs(self) -> List[Dict]:
-        """Fetch all jobs from the career page"""
-        pass
+    def filter_html(self,soup:BeautifulSoup) -> List[element.Tag]:
+        '''
+        Have 2 levels of processing (gen_listings and spec_listings) to make filtering more readeable
+        This is because often specific filters are a subclass of the overall job listings, or 
+        the generic filter cant capture all the job ads or filter out the correct ones. 
 
+        If company has non standard, overwrite in child method.
+        
+        :param soup: Description
+        :return: Description
+        :rtype: List
+        '''
+
+        gen_listings = soup.select(self.gen_filter_criteria)
+    
+        # filter out non job listings that got caught by the selector
+        # job listings have the anchor tag inside the div
+        spec_listings = []
+        for listing in gen_listings:
+            if not listing.select(self.spec_filter_critieria):
+                print("Skipping non-job listing")
+                continue
+            spec_listings.append(listing)
+        return spec_listings
+
+    def fetch_jobs(self, link:Path) -> pd.DataFrame:
+        """Fetch jobs from Culture Amp careers page"""
+        try:
+            if self.cached_page:
+                with open(link, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+            else:
+                # # --- UNCOMMENT FOR REAL LINK ---
+                # #open the supplied link
+                # response = requests.get(self.url, headers=self.headers)
+                
+                # response.raise_for_status()
+                # html_content = response.text
+                # # --- UNCOMMENT FOR REAL LINK ---
+                pass
+                
+            soup = BeautifulSoup(html_content, 'html.parser')
+            self.soup = soup
+            jobs = []
+            
+            # Find all job listings
+            job_listings = self.filter_html(soup)
+            for listing in job_listings:
+                job = self._parse_job_listing(listing)
+                if job:
+                    jobs.append(job)
+            
+            if len(jobs) == 0:
+                #potentially error, maybe the page structure has changed.
+                #TODO: figure out how to handle this
+                pass #for now
+
+            jobs_df = pd.DataFrame(columns=["Title", "Location", "Link"])
+            for job in jobs:
+                jobs_df = pd.concat([jobs_df, pd.DataFrame({
+                    "Title": [job['title']], 
+                    "Location": [job['location']], 
+                    "Link": [job['link']]
+                    }
+                    )], ignore_index=True)
+
+            return jobs_df
+            
+        except Exception as e:
+            self.logger.error(f"Error fetching jobs from {self.company}: {str(e)}")
+            return []
+        
+    
+        
+        
     def get_new_jobs(self, jobs_df: pd.DataFrame, db_name: str) -> List[Dict]:
         """
         Docstring for get_new_jobs
@@ -100,7 +175,7 @@ class BaseScraper(ABC):
     def add_company_to_db(self)-> int:
         """Add or update company info in the database"""
         import sqlite3
-        from config import DB_NAME
+        from db import DB_NAME
         with sqlite3.connect(DB_NAME) as conn:
             c = conn.cursor()
             #check if company exists, if not insert

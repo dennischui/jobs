@@ -37,7 +37,7 @@ def run_scraper() -> List:
                 # Add rate limiting delay before making request
                 time.sleep(RATE_LIMIT_DELAY)
                 
-                jobs_df = scraper.fetch_jobs()
+                jobs_df = scraper.fetch_jobs(scraper.cached_page)
                 new_jobs, expired_jobs = scraper.get_new_jobs(jobs_df, 'jobs.db')
                 add_jobs = scraper.save_jobs(new_jobs, 'jobs.db')
                 remove_jobs = scraper.remove_expired_jobs(expired_jobs, 'jobs.db')
