@@ -5,9 +5,9 @@ import threading
 import time
 import requests
 
-from config import DB_NAME, SCRAPE_INTERVAL_SECONDS
+from db import DB_NAME, SCRAPE_INTERVAL_SECONDS
 from scrapers.scraper_runner import run_scraper
-from db import initialise_db
+from db import  initialise_db
 import os
 app = Flask(__name__)
 

@@ -1,7 +1,8 @@
 import sqlite3
-from datetime import datetime
-from config import DB_NAME
-import pandas as pd 
+
+DB_NAME = 'jobs.db'
+SCRAPE_INTERVAL_SECONDS = 3600  # 1 hour
+
 
 def initialise_db(db_name):
     with sqlite3.connect(db_name) as conn:
